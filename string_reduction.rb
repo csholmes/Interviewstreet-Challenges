@@ -3,45 +3,40 @@
 # Interview Street
 # String Reduction Problem
 
-# This is my first attempt. I use dynamic programming/memoization
+# The pattern:
+# If the string is all a's, all b's, or all c's, then return the length of the string... you can't reduce anything
+# Otherwise, you have to find the number of a's, b's, and c's.
+# If the number of a's, b's, and c's are all odd or all even, then return 2
+# Otherwise return 1
+#
+# The reason for this:
+# For any triplet with all 3 a's/b's/c's => return 3
+# For any triplet with [0,1,2], each value corresponding to a/b/c, can be reduced to 1
+# For any triplet with [1,1,1], return 2. Example. abc. You can only reduce this to cc or aa. 
+#
+# For a 4-tuple with [0,2,2] abc-frequency, you have to reduce it to [1,1,1], so you have to return 2.
+# For a 5-tuple [1,1,3], you have options to reduce it .. [2,0,2],[0,2,2],[0,0,4] - best option gives 2
 
-# It won't work because it's not fast enough. works up to length ~20
 
-@h = { "ab" => 1, "ac" => 1, "ba" => 1, "bc" => 1, "ca" => 1, "cb" => 1 }
-@vh = { "ab" => "c", "ac" => "b", "ba" => "c", "bc" => "a", "ca" => "b", "cb" => "a" }
-
-
-# This function calculates the different substring. Ex, "babc" => ["cbc","bcc","baa"]
-def versions(str)
-  v = []
-  (str.length-1).times do |j|
-    if str[j] != str[j+1]
-      v.push str[0...j]+@vh[str[j..j+1]]+str[j+2..-1]
+def string_reduce(str)
+  
+  # Count the number of a's, b's, and c's in the string
+  a,b,c = 0,0,0
+  str.length.times do |i|
+    case str[i,1]
+    when "a"; a += 1
+    when "b"; b += 1
+    when "c"; c += 1
     end
   end
-  return v
+  
+  #if two of the number are 0, return the string length. Otherwise, check if the evenness of a, b, and c are all the same
+  (a+b==0 or b+c==0 or a+c==0) ? (return str.length) : ((a%2==b%2 and b%2==c%2) ? (return 2) : (return 1))
+  
 end
 
-# if in the hash, return that value
-# else, take minimum of versions
-# if versions is null, return string length
-def reduce(str)  
-  if not @h[str].nil?
-    return @h[str]
-  else
-    reductions = []
-    versions(str).each do |v|
-      val = reduce(v)
-      reductions.push val
-      if val == 1 # this quickens the speed
-        break
-      end
-    end
-    reductions.empty? ? (@h[str] = str.length; return str.length) : (@h[str] = reductions.min; return reductions.min)   
-  end
-end
+tests = gets.chomp  # get the number of tests
 
-#q = "ccbbacbbcaabccaabbbccbcbb"
-#p q
-#p reduce(q)
-#p @h.size
+tests.to_i.times do 
+  puts string_reduce(gets.chomp) 
+end
